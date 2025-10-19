@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../services/auth.jsx';
-import { getMyEnrollments, setFirstChoice, endpoints, apiGet, apiDelete } from '../services/api.js';
+import { useAuth, getMyEnrollments, setFirstChoice, endpoints, apiGet, apiDelete } from '../services';
+
+type Enrollment = { moduleId: number | string; firstChoice?: boolean };
+type ModuleItem = { id: number; name: string };
 
 export default function MijnInschrijvingen() {
   const { token, isLoggedIn } = useAuth();
-  const [enrollments, setEnrollments] = useState([]);
-  const [modules, setModules] = useState([]);
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [modules, setModules] = useState<ModuleItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -15,14 +17,14 @@ export default function MijnInschrijvingen() {
       try {
         const [enrs, mods] = await Promise.all([
           isLoggedIn ? getMyEnrollments(token) : [],
-          apiGet(endpoints.modules),
+          apiGet<ModuleItem[]>(endpoints.modules),
         ]);
         if (alive) {
-          setEnrollments(enrs || []);
+          setEnrollments((enrs as Enrollment[]) || []);
           setModules(mods || []);
         }
-      } catch (e) {
-        setError(e.message);
+      } catch (e: any) {
+        setError(e.message || 'Kon gegevens niet laden');
       } finally {
         if (alive) setLoading(false);
       }
@@ -30,27 +32,26 @@ export default function MijnInschrijvingen() {
     return () => { alive = false; };
   }, [isLoggedIn, token]);
 
-  async function handleSetFirstChoice(moduleId) {
+  async function handleSetFirstChoice(moduleId: number | string) {
     try {
-      await setFirstChoice(moduleId, true, token);
-      const enrs = await getMyEnrollments(token);
+      await setFirstChoice(Number(moduleId), true, token);
+      const enrs = await getMyEnrollments(token) as Enrollment[];
       setEnrollments(enrs || []);
-    } catch (e) {
-      // Toon een nette melding, geen raw JSON
+    } catch {
       alert('Kon eerste keuze niet opslaan. Probeer opnieuw.');
     }
   }
 
-    async function handleDeleteEnrollment(moduleId) {
-      if (!window.confirm('Weet je zeker dat je deze inschrijving wilt verwijderen?')) return;
-      try {
-        await apiDelete(`${endpoints.enrollments}/${moduleId}`, token);
-        const enrs = await getMyEnrollments(token);
-        setEnrollments(enrs || []);
-      } catch (e) {
-        alert(e.message);
-      }
+  async function handleDeleteEnrollment(moduleId: number | string) {
+    if (!window.confirm('Weet je zeker dat je deze inschrijving wilt verwijderen?')) return;
+    try {
+      await apiDelete(`${endpoints.enrollments}/${moduleId}`, token);
+      const enrs = await getMyEnrollments(token) as Enrollment[];
+      setEnrollments(enrs || []);
+    } catch (e: any) {
+      alert(e.message || 'Kon inschrijving niet verwijderen');
     }
+  }
 
   if (!isLoggedIn) return <p>Log eerst in om je inschrijvingen te zien.</p>;
   if (loading) return <p>Bezig met laden…</p>;
@@ -66,7 +67,7 @@ export default function MijnInschrijvingen() {
           {enrollments.map((e) => {
             const mod = modules.find((m) => Number(m.id) === Number(e.moduleId));
             return (
-              <li key={e.moduleId} style={{ padding: '8px 0', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <li key={String(e.moduleId)} style={{ padding: '8px 0', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span>
                   <strong>{mod?.name || `Module ${e.moduleId}`}</strong>
                   {e.firstChoice ? (

@@ -1,5 +1,5 @@
 export default function FAQ() {
-  const faqs = [
+  const faqs: { question: string; answer: string }[] = [
     {
       question: 'Hoeveel inschrijvingen mag ik maximaal hebben?',
       answer: 'Je mag maximaal 3 keuzemodules kiezen. Als je al 3 modules hebt gekozen, kun je niet meer inschrijven. Je kunt wel een bestaande inschrijving verwijderen om ruimte te maken voor een andere module.',

@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiPost, endpoints } from '../services/api.js';
-import { useAuth } from '../services/auth.jsx';
+import { apiPost, endpoints } from '../services/api';
+import { useAuth } from '../services/auth';
+
+type LoginResponse = { access_token?: string };
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -10,19 +12,19 @@ export default function Login() {
   const navigate = useNavigate();
   const { setToken, isLoggedIn } = useAuth();
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
     try {
-      const res = await apiPost(endpoints.login, { username, password });
+      const res = await apiPost<LoginResponse>(endpoints.login, { username, password });
       if (res?.access_token) {
         setToken(res.access_token);
         navigate('/');
       } else {
         setError('Invalid response from server');
       }
-    } catch (e) {
-      setError(e.message);
+    } catch (e: any) {
+      setError(e.message || 'Login mislukt');
     }
   }
 

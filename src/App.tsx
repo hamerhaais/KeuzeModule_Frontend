@@ -1,13 +1,13 @@
-import { Link, Route, Routes } from 'react-router-dom'
-import './App.css'
-import ModulesList from './components/ModulesList.jsx';
-import ModuleDetail from './components/ModuleDetail.jsx';
-import Login from './components/Login.jsx'
-import MijnInschrijvingen from './components/MijnInschrijvingen.jsx'
-import FAQ from './components/FAQ.jsx'
-import { useAuth } from './services/auth.jsx'
+import { Link, Route, Routes } from 'react-router-dom';
+import './App.css';
+import ModulesList from './components/ModulesList';
+import ModuleDetail from './components/ModuleDetail';
+import Login from './components/Login';
+import MijnInschrijvingen from './components/MijnInschrijvingen';
+import FAQ from './components/FAQ';
+import { useAuth } from './services';
 
-function App() {
+export default function App() {
   const { isLoggedIn, setToken } = useAuth();
   return (
     <div className="app-container">
@@ -31,7 +31,5 @@ function App() {
         </Routes>
       </main>
     </div>
-  )
+  );
 }
-
-export default App
