@@ -24,7 +24,17 @@ export default function Login() {
         setError('Invalid response from server');
       }
     } catch (e: any) {
-      setError(e.message || 'Login mislukt');
+      // Try to parse error for more specific messages
+      let msg = e?.message || '';
+      if (msg.includes('401') || msg.toLowerCase().includes('unauthorized')) {
+        setError('Unauthorized: Wrong credentials');
+      } else if (msg.includes('404') || msg.toLowerCase().includes('not found')) {
+        setError('User does not exist');
+      } else if (msg) {
+        setError(msg);
+      } else {
+        setError('Login mislukt');
+      }
     }
   }
 
