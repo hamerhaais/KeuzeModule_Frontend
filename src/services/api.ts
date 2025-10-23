@@ -11,55 +11,108 @@ export const endpoints = {
 } as const;
 
 export async function apiGet<T = any>(url: string, token?: string | null): Promise<T> {
-  const res = await fetch(url, {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  });
-  if (!res.ok) throw new Error(`GET ${url} failed: ${res.status}`);
-  return res.json();
+  console.log(`[API GET] ${url}`);
+  try {
+    const res = await fetch(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    if (!res.ok) {
+      console.error(`[API GET] Failed: ${url} - Status ${res.status}`);
+      const text = await res.text();
+      console.error(`[API GET] Response: ${text}`);
+      throw new Error(`GET ${url} failed: ${res.status}`);
+    }
+    const data = await res.json();
+    console.log(`[API GET] Success: ${url}`);
+    return data;
+  } catch (error: any) {
+    console.error(`[API GET] Error: ${url}`, error);
+    throw error;
+  }
 }
 
 export async function apiPost<T = any>(url: string, body: unknown, token?: string | null): Promise<T | null> {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`POST ${url} failed: ${res.status} ${text}`);
+  console.log(`[API POST] ${url}`, body);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(`[API POST] Failed: ${url} - Status ${res.status}`);
+      console.error(`[API POST] Response: ${text}`);
+      throw new Error(`POST ${url} failed: ${res.status} ${text}`);
+    }
+    try {
+      const data = await res.json();
+      console.log(`[API POST] Success: ${url}`);
+      return data;
+    } catch {
+      console.log(`[API POST] Success (no JSON): ${url}`);
+      return null;
+    }
+  } catch (error: any) {
+    console.error(`[API POST] Error: ${url}`, error);
+    throw error;
   }
-  try { return await res.json(); } catch { return null; }
 }
 
 export async function apiPut<T = any>(url: string, body: unknown, token?: string | null): Promise<T> {
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`PUT ${url} failed: ${res.status} ${text}`);
+  console.log(`[API PUT] ${url}`, body);
+  try {
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(`[API PUT] Failed: ${url} - Status ${res.status}`);
+      console.error(`[API PUT] Response: ${text}`);
+      throw new Error(`PUT ${url} failed: ${res.status} ${text}`);
+    }
+    const data = await res.json();
+    console.log(`[API PUT] Success: ${url}`);
+    return data;
+  } catch (error: any) {
+    console.error(`[API PUT] Error: ${url}`, error);
+    throw error;
   }
-  return res.json();
 }
 
 export async function apiDelete<T = any>(url: string, token?: string | null): Promise<T | null> {
-  const res = await fetch(url, {
-    method: 'DELETE',
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`DELETE ${url} failed: ${res.status} ${text}`);
+  console.log(`[API DELETE] ${url}`);
+  try {
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(`[API DELETE] Failed: ${url} - Status ${res.status}`);
+      console.error(`[API DELETE] Response: ${text}`);
+      throw new Error(`DELETE ${url} failed: ${res.status} ${text}`);
+    }
+    try {
+      const data = await res.json();
+      console.log(`[API DELETE] Success: ${url}`);
+      return data;
+    } catch {
+      console.log(`[API DELETE] Success (no JSON): ${url}`);
+      return null;
+    }
+  } catch (error: any) {
+    console.error(`[API DELETE] Error: ${url}`, error);
+    throw error;
   }
-  try { return await res.json(); } catch { return null; }
 }
 
 // Convenience helpers for enrollments
